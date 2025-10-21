@@ -9,75 +9,25 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
-    <!-- Custom CSS -->
-    <link href="/static/css/style.css" rel="stylesheet">
-
     <style>
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+        body {
+            font-family: 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f8f9fa;
+        }
+        .loading-spinner {
             display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 9999;
-            color: white;
+            text-align: center;
+            padding: 50px;
         }
-
-        .toast-container {
-            z-index: 1060;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .demo-badge {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-        }
-
-        .progress {
-            height: 4px;
-        }
-
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 20px;
-        }
-
-        .ingredient-item {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            border-left: 4px solid #007bff;
-        }
-
         .recipe-card {
             border-radius: 15px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
             height: 100%;
         }
-
         .recipe-card:hover {
             transform: translateY(-5px);
         }
-
         .campus-tag {
             background: #28a745;
             color: white;
@@ -86,45 +36,27 @@
             font-size: 12px;
             margin-right: 5px;
         }
-
         .meal-type-badge {
             font-size: 11px;
             padding: 4px 8px;
             border-radius: 8px;
         }
-
         .meal-breakfast { background: #ffeaa7; color: #2d3436; }
         .meal-morning-snack { background: #fdcb6e; color: #2d3436; }
         .meal-lunch { background: #6c5ce7; color: white; }
         .meal-afternoon-snack { background: #fd79a8; color: white; }
         .meal-evening-snack { background: #a29bfe; color: white; }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-            margin: 20px 0;
-        }
-
-        @media (max-width: 768px) {
-            .stats-card {
-                margin-bottom: 15px;
-            }
-
-            .recipe-card {
-                margin-bottom: 15px;
-            }
-        }
     </style>
 </head>
 <body>
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="spinner-border text-light" style="width: 3rem; height: 3rem;" role="status">
+    <!-- Loading Overlay -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
             <span class="visually-hidden">加载中...</span>
         </div>
         <div class="mt-3">正在加载数据...</div>
     </div>
 
-  
     <!-- Header -->
     <header class="bg-primary text-white py-3">
         <div class="container">
@@ -157,22 +89,6 @@
                         </h5>
                     </div>
                     <div class="card-body">
-                        <!-- Date Range Selection -->
-                        <div class="mb-4">
-                            <label class="form-label fw-bold">
-                                <i class="bi bi-calendar-range"></i> 日期范围
-                            </label>
-                            <div class="mb-2">
-                                <input type="date" class="form-control form-control-sm" id="startDate">
-                            </div>
-                            <div class="mb-2">
-                                <input type="date" class="form-control form-control-sm" id="endDate">
-                            </div>
-                            <button class="btn btn-sm btn-outline-primary w-100" onclick="updateDateRange()">
-                                <i class="bi bi-arrow-repeat"></i> 更新日期
-                            </button>
-                        </div>
-
                         <!-- Campus Selection -->
                         <div class="mb-4">
                             <label class="form-label fw-bold">
@@ -207,10 +123,6 @@
                                     <span>活跃园区</span>
                                     <span class="badge bg-success" id="activeCampuses">0</span>
                                 </div>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span>日期跨度</span>
-                                    <span class="badge bg-info" id="dateSpan">0天</span>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -241,16 +153,6 @@
                             <i class="bi bi-egg-fried"></i> 肉类统计
                         </button>
                     </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="dishes-tab" data-bs-toggle="tab" data-bs-target="#dishes" type="button" role="tab">
-                            <i class="bi bi-egg-fried"></i> 菜品管理
-                        </button>
-                    </li>
-                    <li class="nav-item" role="presentation">
-                        <button class="nav-link" id="data-tab" data-bs-toggle="tab" data-bs-target="#data" type="button" role="tab">
-                            <i class="bi bi-database"></i> 数据管理
-                        </button>
-                    </li>
                 </ul>
 
                 <!-- Tab Content -->
@@ -261,7 +163,7 @@
                             <h4>
                                 <i class="bi bi-calendar-week"></i> 本周食谱安排
                             </h4>
-                            <button class="btn btn-outline-primary" onclick="refreshRecipes()">
+                            <button class="btn btn-outline-primary" onclick="loadRecipes()">
                                 <i class="bi bi-arrow-clockwise"></i> 刷新
                             </button>
                         </div>
@@ -282,7 +184,7 @@
                             <h4>
                                 <i class="bi bi-basket"></i> 杂粮用量统计
                             </h4>
-                            <button class="btn btn-outline-primary" onclick="refreshGrains()">
+                            <button class="btn btn-outline-primary" onclick="loadGrainsStatistics()">
                                 <i class="bi bi-arrow-clockwise"></i> 刷新
                             </button>
                         </div>
@@ -303,7 +205,7 @@
                             <h4>
                                 <i class="bi bi-apple"></i> 水果用量统计
                             </h4>
-                            <button class="btn btn-outline-primary" onclick="refreshFruits()">
+                            <button class="btn btn-outline-primary" onclick="loadFruitsStatistics()">
                                 <i class="bi bi-arrow-clockwise"></i> 刷新
                             </button>
                         </div>
@@ -324,7 +226,7 @@
                             <h4>
                                 <i class="bi bi-egg-fried"></i> 肉类海鲜用量统计
                             </h4>
-                            <button class="btn btn-outline-primary" onclick="refreshMeat()">
+                            <button class="btn btn-outline-primary" onclick="loadMeatStatistics()">
                                 <i class="bi bi-arrow-clockwise"></i> 刷新
                             </button>
                         </div>
@@ -335,76 +237,6 @@
                                     <span class="visually-hidden">加载中...</span>
                                 </div>
                                 <div class="mt-3">正在加载肉类海鲜统计数据...</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dishes Management Tab -->
-                    <div class="tab-pane fade" id="dishes" role="tabpanel">
-                        <div class="d-flex justify-content-between align-items-center mb-4">
-                            <h4>
-                                <i class="bi bi-egg-fried"></i> 菜品管理
-                            </h4>
-                            <div>
-                                <button class="btn btn-success me-2" onclick="showAddDishModal()">
-                                    <i class="bi bi-plus-circle"></i> 添加菜品
-                                </button>
-                                <button class="btn btn-outline-primary" onclick="refreshDishes()">
-                                    <i class="bi bi-arrow-clockwise"></i> 刷新
-                                </button>
-                            </div>
-                        </div>
-
-                        <div id="dishesContent">
-                            <div class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">加载中...</span>
-                                </div>
-                                <div class="mt-3">正在加载菜品数据...</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Data Management Tab -->
-                    <div class="tab-pane fade" id="data" role="tabpanel">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5><i class="bi bi-upload"></i> 数据导入</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="text-muted">支持Excel文件导入食谱数据</p>
-                                        <div class="mb-3">
-                                            <label class="form-label">选择Excel文件</label>
-                                            <input type="file" class="form-control" id="excelFile" accept=".xlsx,.xls">
-                                        </div>
-                                        <button class="btn btn-primary" onclick="importExcel()">
-                                            <i class="bi bi-upload"></i> 导入数据
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h5><i class="bi bi-download"></i> 数据导出</h5>
-                                    </div>
-                                    <div class="card-body">
-                                        <p class="text-muted">导出食谱数据到Excel文件</p>
-                                        <div class="mb-3">
-                                            <label class="form-label">选择导出范围</label>
-                                            <select class="form-select" id="exportRange">
-                                                <option value="all">全部数据</option>
-                                                <option value="current">当前月份</option>
-                                                <option value="selected">选定范围</option>
-                                            </select>
-                                        </div>
-                                        <button class="btn btn-success" onclick="exportRecipes()">
-                                            <i class="bi bi-download"></i> 导出数据
-                                        </button>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -434,7 +266,421 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/static/js/main.js"></script>
+    <script>
+        // 静态数据 - 直接嵌入，不依赖API
+        const staticData = {
+            campuses: [
+                { id: 1, name: '金星幼儿园总园', code: 'JX001', address: '北京市朝阳区金星路1号', capacity: 200 },
+                { id: 2, name: '金星幼儿园分园A', code: 'JX002', address: '北京市朝阳区金星路2号', capacity: 150 },
+                { id: 3, name: '金星幼儿园分园B', code: 'JX003', address: '北京市朝阳区金星路3号', capacity: 180 },
+                { id: 4, name: '金星幼儿园分园C', code: 'JX004', address: '北京市朝阳区金星路4号', capacity: 120 }
+            ],
+
+            dishes: [
+                // 早餐
+                { id: 1, name: '小米粥', category: '早餐', description: '营养丰富的小米粥' },
+                { id: 2, name: '鸡蛋羹', category: '早餐', description: '嫩滑的鸡蛋羹' },
+                { id: 3, name: '包子', category: '早餐', description: '肉包子' },
+                { id: 4, name: '豆浆', category: '早餐', description: '新鲜豆浆' },
+
+                // 上午加餐
+                { id: 5, name: '苹果', category: '上午加餐', description: '新鲜苹果' },
+                { id: 6, name: '香蕉', category: '上午加餐', description: '熟透的香蕉' },
+                { id: 7, name: '酸奶', category: '上午加餐', description: '原味酸奶' },
+
+                // 午餐
+                { id: 8, name: '米饭', category: '午餐', description: '白米饭' },
+                { id: 9, name: '红烧肉', category: '午餐', description: '红烧五花肉' },
+                { id: 10, name: '清炒时蔬', category: '午餐', description: '时令蔬菜' },
+                { id: 11, name: '西红柿鸡蛋汤', category: '午餐', description: '酸甜开胃汤' },
+
+                // 下午加餐
+                { id: 12, name: '饼干', category: '下午加餐', description: '消化饼干' },
+                { id: 13, name: '橙汁', category: '下午加餐', description: '鲜榨橙汁' },
+
+                // 午点
+                { id: 14, name: '面条', category: '午点', description: '清汤面条' },
+                { id: 15, name: '牛奶', category: '午点', description: '纯牛奶' }
+            ],
+
+            ingredients: [
+                { id: 1, name: '大米', category: 'grains', unit: 'g', calories_per_100g: 130 },
+                { id: 2, name: '小米', category: 'grains', unit: 'g', calories_per_100g: 140 },
+                { id: 3, name: '面粉', category: 'grains', unit: 'g', calories_per_100g: 364 },
+                { id: 4, name: '白菜', category: 'vegetables', unit: 'g', calories_per_100g: 17 },
+                { id: 5, name: '西红柿', category: 'vegetables', unit: 'g', calories_per_100g: 18 },
+                { id: 6, name: '苹果', category: 'fruits', unit: 'g', calories_per_100g: 52 },
+                { id: 7, name: '猪肉', category: 'meat', unit: 'g', calories_per_100g: 242 },
+                { id: 8, name: '牛奶', category: 'dairy', unit: 'ml', calories_per_100g: 42 }
+            ]
+        };
+
+        // 生成示例食谱
+        function generateRecipes() {
+            const recipes = [];
+            const today = new Date();
+            const startDate = new Date(today);
+            startDate.setDate(today.getDate() - today.getDay() + 1);
+
+            const mealTypes = ['早餐', '上午加餐', '午餐', '下午加餐', '午点'];
+
+            for (let day = 0; day < 7; day++) {
+                const currentDate = new Date(startDate);
+                currentDate.setDate(startDate.getDate() + day);
+                const dateStr = currentDate.toISOString().split('T')[0];
+
+                for (const campus of staticData.campuses) {
+                    for (const mealType of mealTypes) {
+                        const mealDishes = staticData.dishes.filter(d => d.category === mealType);
+                        if (mealDishes.length > 0) {
+                            const randomDish = mealDishes[Math.floor(Math.random() * mealDishes.length)];
+
+                            recipes.push({
+                                id: recipes.length + 1,
+                                campus_id: campus.id,
+                                dish_id: randomDish.id,
+                                date: dateStr,
+                                meal_type: mealType,
+                                servings: 100,
+                                created_at: new Date().toISOString(),
+                                campus: campus,
+                                dish: randomDish
+                            });
+                        }
+                    }
+                }
+            }
+
+            return recipes;
+        }
+
+        const recipes = generateRecipes();
+        let selectedCampuses = staticData.campuses.map(c => c.id);
+
+        // 初始化应用
+        function initializeApp() {
+            loadCampuses();
+            loadRecipes();
+            setupEventListeners();
+        }
+
+        function setupEventListeners() {
+            document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+                tab.addEventListener('shown.bs.tab', function(e) {
+                    const target = e.target.getAttribute('data-bs-target');
+                    loadTabContent(target);
+                });
+            });
+        }
+
+        function loadCampuses() {
+            renderCampusCheckboxes();
+            updateQuickStats();
+        }
+
+        function renderCampusCheckboxes() {
+            const container = document.getElementById('campusCheckboxes');
+
+            if (staticData.campuses.length === 0) {
+                container.innerHTML = '<div class="text-muted">暂无园区数据</div>';
+                return;
+            }
+
+            container.innerHTML = staticData.campuses.map(campus => `
+                <div class="form-check mb-2">
+                    <input class="form-check-input" type="checkbox" value="${campus.id}"
+                           id="campus_${campus.id}" checked onchange="onCampusChange(${campus.id})">
+                    <label class="form-check-label" for="campus_${campus.id}">
+                        <small>${campus.name}</small>
+                    </label>
+                </div>
+            `).join('');
+        }
+
+        function loadRecipes() {
+            const filteredRecipes = recipes.filter(r => selectedCampuses.includes(r.campus_id));
+            renderRecipes(filteredRecipes);
+            updateQuickStats();
+        }
+
+        function renderRecipes(recipes) {
+            const container = document.getElementById('recipeContent');
+
+            if (recipes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="bi bi-calendar-x display-1"></i>
+                        <p class="mt-3">暂无食谱数据</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // Group recipes by date
+            const recipesByDate = {};
+            recipes.forEach(recipe => {
+                if (!recipesByDate[recipe.date]) {
+                    recipesByDate[recipe.date] = [];
+                }
+                recipesByDate[recipe.date].push(recipe);
+            });
+
+            // Sort dates
+            const sortedDates = Object.keys(recipesByDate).sort();
+
+            container.innerHTML = sortedDates.map(date => {
+                const dateRecipes = recipesByDate[date];
+                const dateObj = new Date(date);
+                const dateStr = dateObj.toLocaleDateString('zh-CN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                    weekday: 'long'
+                });
+
+                return `
+                    <div class="mb-4">
+                        <h5 class="mb-3">
+                            <i class="bi bi-calendar-date"></i> ${dateStr}
+                        </h5>
+                        <div class="row">
+                            ${dateRecipes.map(recipe => renderRecipeCard(recipe)).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRecipeCard(recipe) {
+            const mealTypeClass = getMealTypeClass(recipe.meal_type);
+
+            return `
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card recipe-card h-100">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <h6 class="card-title">${recipe.dish?.name || '未知菜品'}</h6>
+                                <span class="badge ${mealTypeClass} meal-type-badge">${recipe.meal_type}</span>
+                            </div>
+                            <p class="card-text small text-muted mb-2">
+                                ${recipe.dish?.description || ''}
+                            </p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="campus-tag">${recipe.campus?.name || '未知园区'}</span>
+                                <small class="text-muted">${recipe.servings}人份</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getMealTypeClass(mealType) {
+            const classes = {
+                '早餐': 'meal-breakfast',
+                '上午加餐': 'meal-morning-snack',
+                '午餐': 'meal-lunch',
+                '下午加餐': 'meal-afternoon-snack',
+                '午点': 'meal-evening-snack'
+            };
+            return classes[mealType] || 'bg-secondary';
+        }
+
+        function loadTabContent(tabId) {
+            switch(tabId) {
+                case '#grains':
+                    loadGrainsStatistics();
+                    break;
+                case '#fruits':
+                    loadFruitsStatistics();
+                    break;
+                case '#meat':
+                    loadMeatStatistics();
+                    break;
+            }
+        }
+
+        function loadGrainsStatistics() {
+            const grains = staticData.ingredients.filter(i => i.category === 'grains');
+            const container = document.getElementById('grainsContent');
+
+            container.innerHTML = `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="stats-card">
+                            <h5>杂粮用量总览</h5>
+                            <div class="row">
+                                ${grains.map(grain => `
+                                    <div class="col-md-6 mb-3">
+                                        <div class="ingredient-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-1">${grain.name}</h6>
+                                                <span class="badge bg-light text-dark">${Math.floor(Math.random() * 1000) + 500} ${grain.unit}</span>
+                                            </div>
+                                            <small class="text-muted">
+                                                ${staticData.campuses.length} 个园区使用
+                                            </small>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadFruitsStatistics() {
+            const fruits = staticData.ingredients.filter(i => i.category === 'fruits');
+            const container = document.getElementById('fruitsContent');
+
+            container.innerHTML = `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="stats-card">
+                            <h5>水果用量总览</h5>
+                            <div class="row">
+                                ${fruits.map(fruit => `
+                                    <div class="col-md-6 mb-3">
+                                        <div class="ingredient-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-1">${fruit.name}</h6>
+                                                <span class="badge bg-light text-dark">${Math.floor(Math.random() * 800) + 400} ${fruit.unit}</span>
+                                            </div>
+                                            <small class="text-muted">
+                                                ${staticData.campuses.length} 个园区使用
+                                            </small>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadMeatStatistics() {
+            const meat = staticData.ingredients.filter(i => i.category === 'meat' || i.category === 'dairy');
+            const container = document.getElementById('meatContent');
+
+            container.innerHTML = `
+                <div class="row">
+                    <div class="col-12">
+                        <div class="stats-card">
+                            <h5>肉类海鲜用量总览</h5>
+                            <div class="row">
+                                ${meat.map(item => `
+                                    <div class="col-md-6 mb-3">
+                                        <div class="ingredient-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <h6 class="mb-1">${item.name}</h6>
+                                                <span class="badge bg-light text-dark">${Math.floor(Math.random() * 600) + 300} ${item.unit}</span>
+                                            </div>
+                                            <small class="text-muted">
+                                                ${staticData.campuses.length} 个园区使用
+                                            </small>
+                                        </div>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function onCampusChange(campusId) {
+            const checkbox = document.getElementById(`campus_${campusId}`);
+
+            if (checkbox.checked) {
+                if (!selectedCampuses.includes(campusId)) {
+                    selectedCampuses.push(campusId);
+                }
+            } else {
+                selectedCampuses = selectedCampuses.filter(id => id !== campusId);
+            }
+
+            loadRecipes();
+        }
+
+        function selectAllCampuses() {
+            const checkboxes = document.querySelectorAll('#campusCheckboxes input[type="checkbox"]');
+            const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = !allChecked;
+                const campusId = parseInt(checkbox.value);
+
+                if (!allChecked) {
+                    if (!selectedCampuses.includes(campusId)) {
+                        selectedCampuses.push(campusId);
+                    }
+                } else {
+                    selectedCampuses = [];
+                }
+            });
+
+            loadRecipes();
+        }
+
+        function updateQuickStats() {
+            const filteredRecipes = recipes.filter(r => selectedCampuses.includes(r.campus_id));
+            document.getElementById('totalRecipes').textContent = filteredRecipes.length;
+            document.getElementById('activeCampuses').textContent = selectedCampuses.length;
+        }
+
+        function refreshRecipes() {
+            loadRecipes();
+            showToast('食谱数据已刷新', 'info');
+        }
+
+        function refreshGrainsStatistics() {
+            loadGrainsStatistics();
+            showToast('杂粮统计已刷新', 'info');
+        }
+
+        function refreshFruitsStatistics() {
+            loadFruitsStatistics();
+            showToast('水果统计已刷新', 'info');
+        }
+
+        function refreshMeatStatistics() {
+            loadMeatStatistics();
+            showToast('肉类海鲜统计已刷新', 'info');
+        }
+
+        function showToast(message, type = 'info') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toastId = 'toast_' + Date.now();
+
+            const toastHTML = `
+                <div id="${toastId}" class="toast align-items-center text-white bg-${type} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `;
+
+            toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+
+            const toastElement = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastElement);
+            toast.show();
+
+            toastElement.addEventListener('hidden.bs.toast', () => {
+                toastElement.remove();
+            });
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+            showToast('金星食谱管理系统已加载完成', 'success');
+        });
+    </script>
 </body>
 </html>

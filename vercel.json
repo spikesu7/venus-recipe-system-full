@@ -1,23 +1,9 @@
 {
   "version": 2,
-  "name": "venus-recipe-system",
-  "builds": [
-    {
-      "src": "api/index.js",
-      "use": "@vercel/node"
+  "name": "venus-recipe-system-static",
+  "functions": {
+    "index.html": {
+      "runtime": "nodejs14.x"
     }
-  ],
-  "routes": [
-    {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/api/index.js"
-    }
-  ],
-  "env": {
-    "NODE_ENV": "production"
   }
 }
