@@ -4,17 +4,10 @@
   "builds": [
     {
       "src": "api/index.js",
-      "use": "@vercel/node",
-      "config": {
-        "maxDuration": 10
-      }
+      "use": "@vercel/node"
     }
   ],
   "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/index.js"
-    },
     {
       "src": "/static/(.*)",
       "dest": "/static/$1"
@@ -26,9 +19,5 @@
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "installCommand": "npm install",
-  "buildCommand": "echo 'No build step required for Node.js'",
-  "outputDirectory": "",
-  "framework": null
+  }
 }
