@@ -235,7 +235,8 @@ function generateSampleRecipes() {
   const recipes = [];
   const today = new Date();
   const startDate = new Date(today);
-  startDate.setDate(today.getDate() - today.getDay());
+  // Set to Monday of current week
+  startDate.setDate(today.getDate() - today.getDay() + 1);
 
   const mealTypes = ['早餐', '上午加餐', '午餐', '下午加餐', '午点'];
 
@@ -266,6 +267,7 @@ function generateSampleRecipes() {
     }
   }
 
+  console.log(`Generated ${recipes.length} recipes for this week`);
   return recipes;
 }
 
@@ -273,7 +275,24 @@ const sampleRecipes = generateSampleRecipes();
 
 // API Routes
 app.get('/api/campuses', (req, res) => {
+  console.log('GET /api/campuses - returning', sampleData.campuses.length, 'campuses');
   res.json({ success: true, data: sampleData.campuses });
+});
+
+// Debug endpoint
+app.get('/api/debug', (req, res) => {
+  res.json({
+    success: true,
+    data: {
+      campuses_count: sampleData.campuses.length,
+      dishes_count: sampleData.dishes.length,
+      recipes_count: sampleRecipes.length,
+      ingredients_count: sampleData.ingredients.length,
+      campuses: sampleData.campuses.map(c => ({ id: c.id, name: c.name })),
+      dish_categories: [...new Set(sampleData.dishes.map(d => d.category))],
+      recipe_dates: [...new Set(sampleRecipes.map(r => r.date))].sort()
+    }
+  });
 });
 
 app.get('/api/dishes', (req, res) => {
