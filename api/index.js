@@ -8,7 +8,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Serve static files
-app.use(express.static(path.join(__dirname, '../public')));
+app.use('/static', express.static(path.join(__dirname, '../static')));
+app.use(express.static(path.join(__dirname, '..')));
 
 // Sample data for demonstration
 const sampleData = {
@@ -207,12 +208,12 @@ app.get('/api/generations', (req, res) => {
 
 // Main route - serve the HTML
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../venus-recipe-github/index.html'));
+  res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 // Fallback for other routes
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../venus-recipe-github/index.html'));
+  res.sendFile(path.join(__dirname, '../index.html'));
 });
 
 // Export for Vercel
