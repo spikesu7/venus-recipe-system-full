@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>食谱生成测试页面</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        .form-group { margin: 15px 0; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        select, input { width: 100%; padding: 8px; margin-bottom: 10px; }
+        button { background: #007bff; color: white; padding: 10px 20px; border: none; cursor: pointer; margin: 5px; }
+        button:hover { background: #0056b3; }
+        .results { margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px; }
+        .campus-card { margin: 10px 0; padding: 15px; background: white; border-radius: 5px; border: 1px solid #ddd; }
+        .recipe-item { margin: 5px 0; padding: 5px; background: #e9ecef; border-radius: 3px; }
+        .loading { text-align: center; color: #666; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>金星食谱管理系统 - 测试页面</h1>
+
+        <div class="form-group">
+            <label for="campusSelect">选择园区:</label>
+            <select id="campusSelect" multiple size="5">
+                <!-- 园区将通过JavaScript加载 -->
+            </select>
+            <small>按住Ctrl键可以选择多个园区</small>
+        </div>
+
+        <div class="form-group">
+            <label for="startDate">开始日期:</label>
+            <input type="date" id="startDate" value="2025-01-13">
+        </div>
+
+        <div class="form-group">
+            <label for="endDate">结束日期:</label>
+            <input type="date" id="endDate" value="2025-01-14">
+        </div>
+
+        <button onclick="generateRecipes()">生成食谱</button>
+        <button onclick="clearResults()">清除结果</button>
+
+        <div id="status" class="loading"></div>
+        <div id="results" class="results" style="display: none;"></div>
+    </div>
+
+    <script>
+        let campuses = [];
+
+        // 页面加载时获取园区数据
+        async function loadCampuses() {
+            try {
+                const response = await fetch('/api/campuses');
+                const result = await response.json();
+
+                if (result.success) {
+                    campuses = result.data;
+                    const select = document.getElementById('campusSelect');
+                    select.innerHTML = '';
+
+                    campuses.forEach(campus => {
+                        const option = document.createElement('option');
+                        option.value = campus.id;
+                        option.textContent = `${campus.name} (${campus.code})`;
+                        select.appendChild(option);
+                    });
+
+                    document.getElementById('status').innerHTML = '<div class="success">✅ 成功加载 ' + campuses.length + ' 个园区</div>';
+                } else {
+                    throw new Error('加载园区失败');
+                }
+            } catch (error) {
+                document.getElementById('status').innerHTML = '<div class="error">❌ 加载园区失败: ' + error.message + '</div>';
+            }
+        }
+
+        // 生成食谱
+        async function generateRecipes() {
+            const select = document.getElementById('campusSelect');
+            const selectedOptions = Array.from(select.selectedOptions);
+            const selectedCampuses = selectedOptions.map(option => parseInt(option.value));
+
+            if (selectedCampuses.length === 0) {
+                alert('请至少选择一个园区');
+                return;
+            }
+
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            const statusDiv = document.getElementById('status');
+            const resultsDiv = document.getElementById('results');
+
+            statusDiv.innerHTML = '<div class="loading">🔄 正在生成食谱，请稍候...</div>';
+            resultsDiv.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/generate-recipes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        campuses: selectedCampuses,
+                        startDate: startDate,
+                        endDate: endDate
+                    })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    statusDiv.innerHTML = '<div class="success">✅ 成功生成 ' + result.data.totalRecipes + ' 个食谱！</div>';
+                    displayResults(result.data);
+                } else {
+                    throw new Error(result.message || '生成失败');
+                }
+            } catch (error) {
+                statusDiv.innerHTML = '<div class="error">❌ 生成失败: ' + error.message + '</div>';
+                console.error('Error:', error);
+            }
+        }
+
+        // 显示结果
+        function displayResults(data) {
+            const resultsDiv = document.getElementById('results');
+            let html = '<h2>生成的食谱</h2>';
+
+            data.results.forEach(campusResult => {
+                const campus = campusResult.campus;
+                html += '<div class="campus-card">';
+                html += '<h3>' + campus.name + ' (' + campus.code + ')</h3>';
+                html += '<p><strong>地址:</strong> ' + campus.address + '</p>';
+                html += '<p><strong>容量:</strong> ' + campus.capacity + ' 人</p>';
+                html += '<p><strong>生成数量:</strong> ' + campusResult.stats.totalRecipes + ' 个食谱</p>';
+                html += '<p><strong>日期范围:</strong> ' + campusResult.stats.dateRange + '</p>';
+
+                html += '<h4>详细食谱:</h4>';
+                campusResult.recipes.forEach(recipe => {
+                    const mealTypeMap = {
+                        'breakfast': '早餐',
+                        'lunch': '午餐',
+                        'dinner': '晚餐'
+                    };
+                    html += '<div class="recipe-item">';
+                    html += '<strong>' + recipe.date + ' ' + mealTypeMap[recipe.meal_type] + ':</strong> ';
+                    html += recipe.dish_name;
+
+                    if (recipe.dish_ingredients && recipe.dish_ingredients.length > 0) {
+                        html += '<br><small>食材: ' + recipe.dish_ingredients.map(i => i.name + '(' + i.quantity + (i.unit || 'g') + ')').join(', ') + '</small>';
+                    }
+                    html += '</div>';
+                });
+
+                html += '</div>';
+            });
+
+            resultsDiv.innerHTML = html;
+            resultsDiv.style.display = 'block';
+        }
+
+        // 清除结果
+        function clearResults() {
+            document.getElementById('status').innerHTML = '';
+            document.getElementById('results').style.display = 'none';
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', loadCampuses);
+    </script>
+</body>
+</html>

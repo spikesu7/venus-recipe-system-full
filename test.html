@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金星食谱管理系统 - 测试版</title>
+    <style>
+        body {
+            font-family: 'Arial', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        .demo-info {
+            background: #e8f4fd;
+            border-left: 4px solid #007bff;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        .feature-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            transition: transform 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        .feature-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            color: #495057;
+            margin-bottom: 10px;
+        }
+        .feature-desc {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+        .github-btn {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .github-btn:hover {
+            background: #218838;
+        }
+        .demo-btn {
+            display: inline-block;
+            background: #007bff;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 8px;
+            margin: 10px;
+            transition: background 0.3s;
+        }
+        .demo-btn:hover {
+            background: #0056b3;
+        }
+        .actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .status {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 1.1em;
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ 金星食谱管理系统</h1>
+
+        <div class="demo-info">
+            <strong>📋 项目说明：</strong> 这是一个专业的幼儿园营养食谱管理平台，支持5餐制（早餐、上午加餐、午餐、下午加餐、午点）的完整营养管理方案。
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-title">🏫 多园区管理</div>
+            <div class="feature-desc">支持多个园区同时管理，园区独立统计和查看，统一��谱生成和管理。</div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-title">📊 营养统计分析</div>
+            <div class="feature-desc">杂粮统计、水果统计、肉类统计，各类食材使用量分析和进度可视化显示。</div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-title">📅 食谱表管理</div>
+            <div class="feature-desc">周食谱表可视化展示，多园区食谱对比查看，食谱去重优化显示。</div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-title">🍎 5餐制营养搭配</div>
+            <div class="feature-desc">早餐（3道菜）、上午加餐（水果）、午餐（3-5道菜）、下午加餐（点心）、午点（2-3道菜）。</div>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-title">📱 响应式设计</div>
+            <div class="feature-desc">完美支持桌面和移动设备，现代化界面设计，直观的用户体验。</div>
+        </div>
+
+        <div class="actions">
+            <a href="venus-recipe-github/index.html" class="demo-btn">🚀 在线演示版</a>
+            <a href="venus-recipe-github/README.md" class="github-btn">📖 部署说明</a>
+        </div>
+
+        <div class="status">
+            ✅ GitHub部署版本已准备就绪！<br>
+            📁 文件夹：venus-recipe-github/<br>
+            🌐 可直接部署到GitHub Pages
+        </div>
+    </div>
+
+    <script>
+        // 检查文件是否存在
+        fetch('venus-recipe-github/index.html')
+            .then(response => {
+                if (response.ok) {
+                    console.log('✅ GitHub部署文件准备就绪');
+                } else {
+                    console.error('❌ GitHub部署文件未找到');
+                }
+            })
+            .catch(error => {
+                console.error('❌ 检查文件时出错:', error);
+            });
+
+        // 显示当前时间
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleString('zh-CN');
+            console.log('当前时间:', timeStr);
+        }
+
+        updateTime();
+        setInterval(updateTime, 10000);
+    </script>
+</body>
+</html>

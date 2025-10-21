@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> - 金星食谱管理系统</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <style>
+        .tab-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 0;
+        }
+
+        .nav-tabs .nav-link {
+            color: #6c757d;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            margin-right: 0.5rem;
+            border-radius: 10px 10px 0 0;
+            transition: all 0.3s ease;
+        }
+
+        .nav-tabs .nav-link.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-weight: 600;
+        }
+
+        .nav-tabs .nav-link:hover {
+            background-color: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .nav-tabs .nav-link.active:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: translateY(0);
+        }
+
+        .completed-tab {
+            background-color: #d4edda !important;
+            color: #155724 !important;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: #f8f9fa;
+            cursor: pointer;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .loading-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .campus-badge {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+        }
+
+        .meal-type-badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .meal-breakfast { background-color: #fff3cd; color: #856404; }
+        .meal-lunch { background-color: #d1ecf1; color: #0c5460; }
+        .meal-dinner { background-color: #f8d7da; color: #721c24; }
+
+        .logo-img {
+            height: 60px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="tab-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="mb-0 d-flex align-items-center">
+                        <img src="/images/logo.png" alt="金星食谱管理系统" class="me-3 logo-img">
+                        金星食谱管理系统
+                    </h1>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <small class="me-3">幼儿园食谱智能生成与管理平台</small>
+                    <span id="currentTime" class="badge bg-light text-dark"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <!-- Tab Navigation -->
+        <ul class="nav nav-tabs mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link <%= activeTab === 'recipe' ? 'active' : '' %>"
+                        id="recipe-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#recipe"
+                        type="button"
+                        role="tab">
+                    <i class="bi bi-magic me-2"></i>食谱生成
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link <%= activeTab === 'grains' ? 'active completed-tab' : '' %>"
+                        id="grains-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#grains"
+                        type="button"
+                        role="tab">
+                    <i class="bi bi-basket-fill me-2"></i>杂粮用量
+                    <span class="badge bg-success ms-1" id="grains-check" style="display:none;">✓</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link <%= activeTab === 'fruits' ? 'active completed-tab' : '' %>"
+                        id="fruits-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#fruits"
+                        type="button"
+                        role="tab">
+                    <i class="bi bi-apple me-2"></i>水果用量
+                    <span class="badge bg-success ms-1" id="fruits-check" style="display:none;">✓</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link <%= activeTab === 'meat' ? 'active completed-tab' : '' %>"
+                        id="meat-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#meat"
+                        type="button"
+                        role="tab">
+                    <i class="bi bi-egg-fried me-2"></i>肉类海鲜
+                    <span class="badge bg-success ms-1" id="meat-check" style="display:none;">✓</span>
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link <%= activeTab === 'manage' ? 'active' : '' %>"
+                        id="manage-tab"
+                        data-bs-toggle="tab"
+                        data-bs-target="#manage"
+                        type="button"
+                        role="tab">
+                    <i class="bi bi-book-fill me-2"></i>食谱库
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Recipe Generation Tab -->
+            <div class="tab-pane fade <%= activeTab === 'recipe' ? 'show active' : '' %>"
+                 id="recipe"
+                 role="tabpanel">
+                <div class="row fade-in">
+                    <div class="col-12">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">
+                                    <i class="bi bi-magic me-2"></i>智能食谱生成
+                                </h4>
+
+                                <!-- Generation Form -->
+                                <form id="recipeForm">
+                                    <div class="row mb-4">
+                                        <div class="col-md-6">
+                                            <label class="form-label fw-bold">
+                                                <i class="bi bi-building me-1"></i>选择校区
+                                            </label>
+                                            <div class="campus-selection">
+                                                <div class="form-check mb-2">
+                                                    <input class="form-check-input" type="checkbox" id="selectAllCampuses">
+                                                    <label class="form-check-label" for="selectAllCampuses">
+                                                        <strong>全选所有校区</strong>
+                                                    </label>
+                                                </div>
+                                                <div id="campusCheckboxes" class="ms-3">
+                                                    <!-- Campuses will be loaded via JavaScript -->
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="startDate" class="form-label fw-bold">
+                                                <i class="bi bi-calendar-date me-1"></i>开始日期
+                                            </label>
+                                            <input type="date" class="form-control" id="startDate" required>
+                                            <small class="text-muted">默认下周一</small>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label for="endDate" class="form-label fw-bold">
+                                                <i class="bi bi-calendar-date me-1"></i>结束日期
+                                            </label>
+                                            <input type="date" class="form-control" id="endDate" required>
+                                            <small class="text-muted">默认周五</small>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-12 text-center">
+                                            <button type="submit" class="btn btn-primary btn-lg me-3">
+                                                <i class="bi bi-lightning-fill me-2"></i>生成选中校区食谱
+                                            </button>
+                                            <button type="button" class="btn btn-success btn-lg" id="generateAllBtn">
+                                                <i class="bi bi-globe me-2"></i>生成全部校区食谱
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                                <!-- Generation Rules Info -->
+                                <div class="alert alert-info mt-4">
+                                    <h6><i class="bi bi-info-circle me-2"></i>生成规则说明</h6>
+                                    <ul class="mb-0">
+                                        <li>仅生成周一至周五的食谱（不含周末）</li>
+                                        <li>同一校区周内菜品不重复，保证营养均衡</li>
+                                        <li>每日包含早餐（3道菜）、午餐（3-5道菜）、午点（2-3道菜）</li>
+                                        <li>生成后将自动计算各校区食材用量统计</li>
+                                        <li>支持批量生成多个校区食谱</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recipe Results -->
+                <div id="recipeResults" class="mt-4" style="display: none;">
+                    <!-- Recipe Results Template -->
+                    <template id="recipeResultsTemplate">
+                        <div class="alert alert-success mb-4">
+                            <h5 class="alert-heading">
+                                <i class="bi bi-check-circle-fill me-2"></i>食谱生成完成！
+                            </h5>
+                            <p id="generationSummary" class="mb-0"></p>
+                        </div>
+
+                        <div id="campusRecipes">
+                            <!-- Campus recipe tables will be inserted here -->
+                        </div>
+                    </template>
+
+                    <!-- Campus Recipe Template -->
+                    <template id="campusRecipeTemplate">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="mb-0">
+                                    <span class="campus-badge" data-campus-name=""></span>
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>日期</th>
+                                                <th>星期</th>
+                                                <th>早餐</th>
+                                                <th>午餐</th>
+                                                <th>午点</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="recipe-table-body">
+                                            <!-- Recipe rows will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Grains Statistics Tab -->
+            <div class="tab-pane fade <%= activeTab === 'grains' ? 'show active' : '' %>"
+                 id="grains"
+                 role="tabpanel">
+                <div class="row fade-in">
+                    <div class="col-12">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">
+                                    <i class="bi bi-basket-fill me-2"></i>杂粮用量统计
+                                    <span class="badge bg-success ms-2" id="grainsStatus" style="display:none;">✓ 已生成</span>
+                                </h4>
+
+                                <div id="grainsContent">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary mb-3" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p>正在加载杂粮用量统计...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fruits Statistics Tab -->
+            <div class="tab-pane fade <%= activeTab === 'fruits' ? 'show active' : '' %>"
+                 id="fruits"
+                 role="tabpanel">
+                <div class="row fade-in">
+                    <div class="col-12">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">
+                                    <i class="bi bi-apple me-2"></i>水果用量统计
+                                    <span class="badge bg-success ms-2" id="fruitsStatus" style="display:none;">✓ 已生成</span>
+                                </h4>
+
+                                <div id="fruitsContent">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary mb-3" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p>正在加载水果用量统计...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Meat & Seafood Statistics Tab -->
+            <div class="tab-pane fade <%= activeTab === 'meat' ? 'show active' : '' %>"
+                 id="meat"
+                 role="tabpanel">
+                <div class="row fade-in">
+                    <div class="col-12">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">
+                                    <i class="bi bi-egg-fried me-2"></i>肉类海鲜用量统计
+                                    <span class="badge bg-success ms-2" id="meatStatus" style="display:none;">✓ 已生成</span>
+                                </h4>
+
+                                <div id="meatContent">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary mb-3" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p>正在加载肉类海鲜用量统计...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recipe Management Tab -->
+            <div class="tab-pane fade <%= activeTab === 'manage' ? 'show active' : '' %>"
+                 id="manage"
+                 role="tabpanel">
+                <div class="row fade-in">
+                    <div class="col-12">
+                        <div class="card stats-card">
+                            <div class="card-body">
+                                <h4 class="card-title mb-4">
+                                    <i class="bi bi-book-fill me-2"></i>食谱库
+                                </h4>
+
+                                <!-- Filter Section -->
+                                <div class="row mb-4">
+                                    <div class="col-md-4">
+                                        <label for="filterCampus" class="form-label fw-bold">
+                                            <i class="bi bi-building me-1"></i>园区筛选
+                                        </label>
+                                        <select class="form-select" id="filterCampus" onchange="loadRecipes()">
+                                            <option value="">所有园区</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="filterMealType" class="form-label fw-bold">
+                                            <i class="bi bi-clock me-1"></i>餐次筛选
+                                        </label>
+                                        <select class="form-select" id="filterMealType" onchange="loadRecipes()">
+                                            <option value="">所有餐次</option>
+                                            <option value="breakfast">早餐</option>
+                                            <option value="lunch">午餐</option>
+                                            <option value="dinner">晚餐</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label class="form-label fw-bold">&nbsp;</label>
+                                        <div class="d-flex gap-2">
+                                            <button type="button" class="btn btn-secondary" onclick="clearFilters()">
+                                                <i class="bi bi-x-circle me-1"></i>清除筛选
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="d-flex gap-2 flex-wrap">
+                                            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addRecipeModal">
+                                                <i class="bi bi-plus-circle me-1"></i>新增食谱
+                                            </button>
+                                            <button type="button" class="btn btn-primary" onclick="loadRecipes()">
+                                                <i class="bi bi-arrow-clockwise me-1"></i>刷新列表
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Recipes Table -->
+                                <div id="recipesTableContainer">
+                                    <div class="text-center py-5">
+                                        <div class="spinner-border text-primary mb-3" role="status">
+                                            <span class="visually-hidden">Loading...</span>
+                                        </div>
+                                        <p>正在加载食谱列表...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Recipe Modal -->
+    <div class="modal fade" id="addRecipeModal" tabindex="-1" aria-labelledby="addRecipeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addRecipeModalLabel">
+                        <i class="bi bi-plus-circle me-2"></i>新增食谱
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addRecipeForm">
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="addCampus" class="form-label fw-bold">园区</label>
+                                <select class="form-select" id="addCampus" required>
+                                    <option value="">请选择园区</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="addMealType" class="form-label fw-bold">餐次</label>
+                                <select class="form-select" id="addMealType" required>
+                                    <option value="">请选择餐次</option>
+                                    <option value="breakfast">早餐</option>
+                                    <option value="lunch">午餐</option>
+                                    <option value="dinner">晚餐</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="addServings" class="form-label fw-bold">人数</label>
+                                <input type="number" class="form-control" id="addServings" min="1" value="100" required>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="addDish" class="form-label fw-bold">菜品名称</label>
+                                <input type="text" class="form-control" id="addDish" placeholder="请输入菜品名称" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="addRecipe()">
+                        <i class="bi bi-plus-circle me-1"></i>新增食谱
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <!-- Recipe Edit Modal -->
+    <div class="modal fade" id="editRecipeModal" tabindex="-1" aria-labelledby="editRecipeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editRecipeModalLabel">
+                        <i class="bi bi-pencil-square me-2"></i>编辑食谱
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editRecipeForm">
+                        <input type="hidden" id="editRecipeId">
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="editCampus" class="form-label fw-bold">园区</label>
+                                <input type="text" class="form-control" id="editCampus" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="editDate" class="form-label fw-bold">日期</label>
+                                <input type="date" class="form-control" id="editDate" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="editMealType" class="form-label fw-bold">餐次</label>
+                                <select class="form-select" id="editMealType" required>
+                                    <option value="breakfast">早餐</option>
+                                    <option value="lunch">午餐</option>
+                                    <option value="dinner">晚餐</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editServings" class="form-label fw-bold">人数</label>
+                                <input type="number" class="form-control" id="editServings" min="1" value="100" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="editDish" class="form-label fw-bold">菜品名称</label>
+                            <input type="text" class="form-control" id="editDish" placeholder="请输入菜品名称" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">食材用量</label>
+                            <div id="editIngredientsContainer" class="border rounded p-3 bg-light">
+                                <div class="text-muted text-center">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    选择菜品后将自动显示食材用量
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" onclick="saveRecipe()">
+                        <i class="bi bi-check-circle me-1"></i>保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-content">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+            <h5 id="loadingMessage">正在处理中...</h5>
+            <div class="progress mt-3">
+                <div class="progress-bar" id="progressBar" role="progressbar" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+        <div id="successToast" class="toast" role="alert">
+            <div class="toast-header bg-success text-white">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                <strong class="me-auto">成功</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="successMessage">
+                操作成功完成！
+            </div>
+        </div>
+
+        <div id="errorToast" class="toast" role="alert">
+            <div class="toast-header bg-danger text-white">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                <strong class="me-auto">错误</strong>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+            </div>
+            <div class="toast-body" id="errorMessage">
+                操作失败，请重试！
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JS -->
+    <script src="/js/main.js"></script>
+
+    <script>
+        // Update current time
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent =
+                now.toLocaleString('zh-CN', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+        }
+
+        updateTime();
+        setInterval(updateTime, 1000);
+
+        // Initialize tooltips
+        const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        const tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    </script>
+</body>
+</html>
