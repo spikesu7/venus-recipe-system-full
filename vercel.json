@@ -1,7 +1,25 @@
 {
   "version": 2,
   "name": "venus-recipe-system",
+  "builds": [
+    {
+      "src": "app.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "static/**/*",
+      "use": "@vercel/static"
+    }
+  ],
   "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/app.js"
+    },
     {
       "src": "/static/(.*)",
       "dest": "/static/$1"
@@ -10,5 +28,10 @@
       "src": "/(.*)",
       "dest": "/index.html"
     }
-  ]
+  ],
+  "functions": {
+    "app.js": {
+      "runtime": "nodejs18.x"
+    }
+  }
 }
