@@ -2,8 +2,12 @@ const express = require('express');
 const path = require('path');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-const database = require('./utils/database');
 require('dotenv').config();
+
+// Use serverless database for Vercel, regular database for local
+const database = process.env.VERCEL ?
+  require('./utils/database-serverless') :
+  require('./utils/database');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

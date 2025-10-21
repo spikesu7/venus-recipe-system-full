@@ -25,7 +25,8 @@
     }
   ],
   "env": {
-    "NODE_ENV": "production"
+    "NODE_ENV": "production",
+    "VERCEL": "true"
   },
   "installCommand": "npm install",
   "buildCommand": "echo 'No build step required for Node.js'",
