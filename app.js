@@ -53,16 +53,24 @@ app.use((req, res) => {
 
 // Start server
 initializeApp().then(() => {
-  app.listen(PORT, () => {
-    console.log(`金星食谱管理系统 running on port ${PORT}`);
-    console.log('Environment:', process.env.NODE_ENV || 'development');
-    if (process.env.NODE_ENV === 'production') {
-      console.log(`Production URL: https://your-app-url.onrender.com`);
-    } else {
-      console.log(`Local URL: http://localhost:${PORT}`);
-    }
-    console.log('Database: SQLite');
-  });
+  // Check if running in Vercel environment
+  if (process.env.VERCEL) {
+    // Export for Vercel serverless functions
+    module.exports = app;
+    console.log('金星食谱管理系统 running on Vercel');
+  } else {
+    // Traditional server startup
+    app.listen(PORT, () => {
+      console.log(`金星食谱管理系统 running on port ${PORT}`);
+      console.log('Environment:', process.env.NODE_ENV || 'development');
+      if (process.env.NODE_ENV === 'production') {
+        console.log(`Production URL: https://your-app-url.vercel.app`);
+      } else {
+        console.log(`Local URL: http://localhost:${PORT}`);
+      }
+      console.log('Database: SQLite');
+    });
+  }
 }).catch(error => {
   console.error('Failed to start application:', error);
   process.exit(1);
