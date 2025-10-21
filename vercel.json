@@ -3,7 +3,7 @@
   "name": "venus-recipe-system",
   "builds": [
     {
-      "src": "app.js",
+      "src": "api/index.js",
       "use": "@vercel/node",
       "config": {
         "maxDuration": 10
@@ -13,20 +13,19 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/app.js"
+      "dest": "/api/index.js"
     },
     {
       "src": "/public/(.*)",
-      "dest": "/public/$1"
+      "dest": "/venus-recipe-github/public/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "/app.js"
+      "dest": "/api/index.js"
     }
   ],
   "env": {
-    "NODE_ENV": "production",
-    "VERCEL": "true"
+    "NODE_ENV": "production"
   },
   "installCommand": "npm install",
   "buildCommand": "echo 'No build step required for Node.js'",
