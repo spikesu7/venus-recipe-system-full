@@ -1,9 +1,14 @@
 {
   "version": 2,
-  "name": "venus-recipe-system-static",
-  "functions": {
-    "index.html": {
-      "runtime": "nodejs14.x"
+  "name": "venus-recipe-system",
+  "routes": [
+    {
+      "src": "/static/(.*)",
+      "dest": "/static/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
     }
-  }
+  ]
 }
