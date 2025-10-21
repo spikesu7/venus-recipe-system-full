@@ -4,11 +4,10 @@
   "builds": [
     {
       "src": "app.js",
-      "use": "@vercel/node"
-    },
-    {
-      "src": "public/**/*",
-      "use": "@vercel/static"
+      "use": "@vercel/node",
+      "config": {
+        "maxDuration": 10
+      }
     }
   ],
   "routes": [
@@ -17,17 +16,16 @@
       "dest": "/app.js"
     },
     {
+      "src": "/public/(.*)",
+      "dest": "/public/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/app.js"
     }
   ],
   "env": {
     "NODE_ENV": "production"
-  },
-  "functions": {
-    "app.js": {
-      "maxDuration": 10
-    }
   },
   "installCommand": "npm install",
   "buildCommand": "echo 'No build step required for Node.js'",
